@@ -1,0 +1,6 @@
+{
+  "name": "Support Hub",
+  "description": "An intelligent customer support ticketing system with AI-powered insights, auto-assignment, and a high-density agent dashboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
