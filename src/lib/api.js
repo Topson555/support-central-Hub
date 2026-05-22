@@ -1,6 +1,11 @@
 /**
  * API Utility for authenticated requests
  */
+const BASE_URL = import.meta.env.VITE_API_URL || 
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+    ? '' 
+    : 'https://backend-support-hub.onrender.com');
+
 export const fetchApi = async (endpoint, options = {}) => {
   const token = localStorage.getItem('token');
   
@@ -13,7 +18,9 @@ export const fetchApi = async (endpoint, options = {}) => {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(endpoint, {
+  const url = endpoint.startsWith('http') ? endpoint : `${BASE_URL}${endpoint}`;
+
+  const response = await fetch(url, {
     ...options,
     headers,
   });
@@ -53,6 +60,15 @@ export const api = {
     body: JSON.stringify(data),
   }),
   rateTicket: (id, data) => fetchApi(`/api/tickets/${id}/rate`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  getPublicTicket: (id) => fetchApi(`/api/tickets/public/${id}`),
+  addPublicReply: (id, data) => fetchApi(`/api/tickets/public/${id}/messages`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  ratePublicTicket: (id, data) => fetchApi(`/api/tickets/public/${id}/rate`, {
     method: 'POST',
     body: JSON.stringify(data),
   }),

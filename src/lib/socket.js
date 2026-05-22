@@ -1,9 +1,9 @@
 import { io } from "socket.io-client";
 
-// In your local setup, you might need to point this to your backend URL
-// e.g., const SOCKET_URL = "http://localhost:5000";
-// For portability, we use an empty string or process.env variable
-const SOCKET_URL = window.location.hostname === 'localhost' ? 'http://localhost:5000' : '';
+const SOCKET_URL = import.meta.env.VITE_API_URL || 
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:3000' 
+    : 'https://backend-support-hub.onrender.com');
 
 export const socket = io(SOCKET_URL, {
   autoConnect: true,
