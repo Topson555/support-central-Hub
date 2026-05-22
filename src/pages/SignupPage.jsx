@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { cn, parseJsonSafe } from '../lib/utils';
+import { fetchApi } from '../lib/api';
 
 const validationSchema = Yup.object({
   name: Yup.string()
@@ -44,7 +45,7 @@ export default function SignupPage() {
     validationSchema,
     onSubmit: async (values, { setSubmitting, setStatus }) => {
       try {
-        const response = await fetch('/api/auth/signup', {
+        const response = await fetchApi('/api/auth/signup', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(values),
