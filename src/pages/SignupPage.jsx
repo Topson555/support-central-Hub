@@ -43,36 +43,28 @@ export default function SignupPage() {
       staffCode: '',
     },
     validationSchema,
-    onSubmit: async (values, { setSubmitting, setStatus }) => {
-      try {
-        const response = await fetchApi('/api/auth/signup', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(values),
-        });
+   onSubmit: async (values, { setSubmitting, setStatus }) => {
+  try {
+    // 1. fetchApi returns the already-parsed JSON data directly!
+    const data = await fetchApi('/api/auth/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(values),
+    });
 
-        const data = await parseJsonSafe(response);
-
-        if (!response.ok) {
-          const message =
-            data?.error ||
-            data?.message ||
-            (typeof data?.text === 'string' ? data.text : null) ||
-            response.statusText ||
-            'Signup failed';
-          throw new Error(message);
-        }
-
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        
-        navigate('/dashboard');
-      } catch (error) {
-        setStatus({ error: error.message || 'Account creation failed. Please try again.' });
-      } finally {
-        setSubmitting(false);
-      }
-    },
+    // 2. Safely store credentials since fetchApi would have thrown an error if it failed
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    
+    // 3. Move to dashboard
+    navigate('/dashboard');
+  } catch (error) {
+    // If your backend returned a 400 bad request, fetchApi threw it, and it lands right here
+    setStatus({ error: error.message || 'Account creation failed. Please try again.' });
+  } finally {
+    setSubmitting(false);
+  }
+},
   });
 
   return (
