@@ -1,10 +1,7 @@
 /**
  * API Utility for authenticated requests
  */
-const BASE_URL = import.meta.env.VITE_API_URL || 
-  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-    ? '' 
-    : 'https://backend-support-hub.onrender.com');
+const BASE_URL = import.meta.env.VITE_API_URL || 'https://backend-support-hub.onrender.com';
 
 export const fetchApi = async (endpoint, options = {}) => {
   const token = localStorage.getItem('token');
