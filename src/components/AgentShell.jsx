@@ -97,21 +97,33 @@ export const AgentShell = ({ children, title, subtitle, actions }) => {
                   {/* Mobile Search Trigger */}
                   <button 
                     onClick={() => setIsMobileSearchOpen(true)}
-                    className="sm:hidden p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-900 rounded-lg transition-colors"
+                    className="group relative sm:hidden p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-900 rounded-lg transition-colors"
                     aria-label="Open search"
                   >
                     <Search className="h-5 w-5" />
+                    <span className="absolute top-full left-1/2 -translate-x-1/2 mt-2.5 px-2 py-1 bg-slate-900 text-white text-[10px] font-black tracking-wide rounded shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-150 pointer-events-none whitespace-nowrap z-30 uppercase">
+                      Search
+                    </span>
                   </button>
 
-                  <button className="relative p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-900 rounded-lg transition-colors">
+                  <button className="group relative p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-900 rounded-lg transition-colors">
                     <Bell className="h-5 w-5" />
                     <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full border border-white" />
+                    <span className="absolute top-full left-1/2 -translate-x-1/2 mt-2.5 px-2 py-1 bg-slate-900 text-white text-[10px] font-black tracking-wide rounded shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-150 pointer-events-none whitespace-nowrap z-30 uppercase">
+                      Notifications
+                    </span>
                   </button>
-                  <button className="p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-900 rounded-lg transition-colors">
+                  <button className="group relative p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-900 rounded-lg transition-colors">
                     <HelpCircle className="h-5 w-5" />
+                    <span className="absolute top-full left-1/2 -translate-x-1/2 mt-2.5 px-2 py-1 bg-slate-900 text-white text-[10px] font-black tracking-wide rounded shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-150 pointer-events-none whitespace-nowrap z-30 uppercase">
+                      Help Center
+                    </span>
                   </button>
-                  <button className="p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-900 rounded-lg transition-colors">
+                  <button className="group relative p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-900 rounded-lg transition-colors">
                     <MessageSquare className="h-5 w-5" />
+                    <span className="absolute top-full left-1/2 -translate-x-1/2 mt-2.5 px-2 py-1 bg-slate-900 text-white text-[10px] font-black tracking-wide rounded shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-150 pointer-events-none whitespace-nowrap z-30 uppercase">
+                      Discussions
+                    </span>
                   </button>
                 </div>
 
