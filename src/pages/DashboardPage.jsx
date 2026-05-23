@@ -30,8 +30,19 @@ export default function DashboardPage() {
     open: 0,
     resolved: 0
   });
+  const [searchQuery, setSearchQuery] = useState('');
   
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleSearch = (e) => {
+      setSearchQuery(e.detail || '');
+    };
+    window.addEventListener('globalSearch', handleSearch);
+    return () => {
+      window.removeEventListener('globalSearch', handleSearch);
+    };
+  }, []);
 
   const calculateStats = useCallback((data) => {
     const total = data.length;
@@ -221,77 +232,113 @@ export default function DashboardPage() {
                     <tr>
                       <td colSpan={6} className="py-20 text-center text-slate-400 font-medium">No records found.</td>
                     </tr>
-                  ) : tickets.map((t) => (
-                    <tr 
-                      key={t._id} 
-                      onClick={() => navigate(`/ticket/${t._id}`)}
-                      className="group hover:bg-slate-50/50 transition-all cursor-pointer relative" 
-                    >
-                       <td className="pl-12 pr-6 py-6 font-mono text-xs text-[#1034A6] font-bold">
-                          #{t._id.substring(t._id.length - 8).toUpperCase()}
-                       </td>
-                       <td className="px-6 py-6">
-                          <div className="flex flex-col text-left">
-                             <span className="font-bold text-slate-900 text-sm group-hover:text-[#1034A6] transition-colors line-clamp-1">{t.subject}</span>
-                             <span className="text-[11px] font-medium text-slate-500 mt-1">{t.customer || t.email}</span>
-                          </div>
-                       </td>
-                       <td className="px-6 py-6 text-sm text-slate-600 font-medium">{t.category}</td>
-                       <td className="px-6 py-6 italic">
-                          <div className="flex items-center gap-2">
-                             <div className="w-5 h-5 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-[8px] font-black text-slate-400 uppercase">
-                                {t.assignee ? t.assignee[0] : 'U'}
-                             </div>
-                             <span className="text-[11px] font-bold text-slate-500 uppercase tracking-tighter">{t.assignee || 'Unassigned'}</span>
-                          </div>
-                       </td>
-                       <td className="px-6 py-6" onClick={(e) => e.stopPropagation()}>
-                         {user?.role === 'user' ? (
-                           <div className={cn(
-                             "px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border w-fit mx-auto",
-                             (t.status?.toLowerCase() === 'open') ? "text-red-600 bg-red-50 border-red-100" :
-                             (t.status?.toLowerCase() === 'pending') ? "text-indigo-600 bg-indigo-50 border-indigo-100" :
-                             "text-emerald-500 bg-emerald-50 border-emerald-100"
-                           )}>
-                             {t.status}
-                           </div>
-                         ) : (
-                           <select 
-                             value={t.status}
-                             onChange={(e) => updateTicketStatus(t._id, e.target.value)}
-                             className={cn(
-                               "px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border outline-none cursor-pointer hover:shadow-sm transition-all",
-                               (t.status?.toLowerCase() === 'open') ? "text-red-600 bg-red-50 border-red-100" :
-                               (t.status?.toLowerCase() === 'pending') ? "text-indigo-600 bg-indigo-50 border-indigo-100" :
-                               "text-emerald-500 bg-emerald-50 border-emerald-100"
+                  ) : (
+                    (() => {
+                      const filteredTickets = tickets.filter(t => {
+                        if (!searchQuery) return true;
+                        const query = searchQuery.toLowerCase();
+                        return (
+                          t._id?.toLowerCase().includes(query) ||
+                          t.subject?.toLowerCase().includes(query) ||
+                          t.customer?.toLowerCase().includes(query) ||
+                          t.email?.toLowerCase().includes(query) ||
+                          t.category?.toLowerCase().includes(query) ||
+                          t.status?.toLowerCase().includes(query)
+                        );
+                      });
+
+                      if (filteredTickets.length === 0) {
+                        return (
+                          <tr>
+                            <td colSpan={6} className="py-20 text-center text-slate-400 font-medium">No matching records found.</td>
+                          </tr>
+                        );
+                      }
+
+                      return filteredTickets.map((t) => (
+                        <tr 
+                          key={t._id} 
+                          onClick={() => navigate(`/ticket/${t._id}`)}
+                          className="group hover:bg-slate-50/50 transition-all cursor-pointer relative" 
+                        >
+                           <td className="pl-12 pr-6 py-6 font-mono text-xs text-[#1034A6] font-bold">
+                              #{t._id.substring(t._id.length - 8).toUpperCase()}
+                           </td>
+                           <td className="px-6 py-6">
+                              <div className="flex flex-col text-left">
+                                 <span className="font-bold text-slate-900 text-sm group-hover:text-[#1034A6] transition-colors line-clamp-1">{t.subject}</span>
+                                 <span className="text-[11px] font-medium text-slate-500 mt-1">{t.customer || t.email}</span>
+                              </div>
+                           </td>
+                           <td className="px-6 py-6 text-sm text-slate-600 font-medium">{t.category}</td>
+                           <td className="px-6 py-6 italic">
+                              <div className="flex items-center gap-2">
+                                 <div className="w-5 h-5 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-[8px] font-black text-slate-400 uppercase">
+                                    {t.assignee ? t.assignee[0] : 'U'}
+                                 </div>
+                                 <span className="text-[11px] font-bold text-slate-500 uppercase tracking-tighter">{t.assignee || 'Unassigned'}</span>
+                              </div>
+                           </td>
+                           <td className="px-6 py-6" onClick={(e) => e.stopPropagation()}>
+                             {user?.role === 'user' ? (
+                               <div className={cn(
+                                 "px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border w-fit mx-auto",
+                                 (t.status?.toLowerCase() === 'open') ? "text-red-600 bg-red-50 border-red-100" :
+                                 (t.status?.toLowerCase() === 'pending') ? "text-indigo-600 bg-indigo-50 border-indigo-100" :
+                                 "text-emerald-500 bg-emerald-50 border-emerald-100"
+                               )}>
+                                 {t.status}
+                               </div>
+                             ) : (
+                               <select 
+                                 value={t.status}
+                                 onChange={(e) => updateTicketStatus(t._id, e.target.value)}
+                                 className={cn(
+                                   "px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border outline-none cursor-pointer hover:shadow-sm transition-all",
+                                   (t.status?.toLowerCase() === 'open') ? "text-red-600 bg-red-50 border-red-100" :
+                                   (t.status?.toLowerCase() === 'pending') ? "text-indigo-600 bg-indigo-50 border-indigo-100" :
+                                   "text-emerald-500 bg-emerald-50 border-emerald-100"
+                                 )}
+                               >
+                                 <option value="open">Open</option>
+                                 <option value="pending">Pending</option>
+                                 <option value="resolved">Resolved</option>
+                                 <option value="closed">Closed</option>
+                               </select>
                              )}
-                           >
-                             <option value="open">Open</option>
-                             <option value="pending">Pending</option>
-                             <option value="resolved">Resolved</option>
-                             <option value="closed">Closed</option>
-                           </select>
-                         )}
-                       </td>
-                       <td className="px-6 py-6 text-right pr-12">
-                          <div className="flex flex-col items-end">
-                             <span className="text-sm font-medium text-slate-600">
-                               {new Date(t.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-                             </span>
-                             <span className="text-[10px] font-bold mt-1 text-slate-400 uppercase tracking-widest">
-                               {new Date(t.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                             </span>
-                          </div>
-                       </td>
-                    </tr>
-                  ))}
+                           </td>
+                           <td className="px-6 py-6 text-right pr-12">
+                              <div className="flex flex-col items-end">
+                                 <span className="text-sm font-medium text-slate-600">
+                                   {new Date(t.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                                 </span>
+                                 <span className="text-[10px] font-bold mt-1 text-slate-400 uppercase tracking-widest">
+                                   {new Date(t.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                 </span>
+                              </div>
+                           </td>
+                        </tr>
+                      ));
+                    })()
+                  )}
                </tbody>
             </table>
          </div>
 
          <div className="px-10 py-6 border-t border-slate-50 flex items-center justify-between">
             <span className="text-xs font-medium text-slate-400">
-              Showing {tickets.length} of {stats.total} records
+               Showing {tickets.length > 0 ? (tickets.filter(t => {
+                 if (!searchQuery) return true;
+                 const query = searchQuery.toLowerCase();
+                 return (
+                   t._id?.toLowerCase().includes(query) ||
+                   t.subject?.toLowerCase().includes(query) ||
+                   t.customer?.toLowerCase().includes(query) ||
+                   t.email?.toLowerCase().includes(query) ||
+                   t.category?.toLowerCase().includes(query) ||
+                   t.status?.toLowerCase().includes(query)
+                 );
+               }).length) : 0} of {stats.total} records
             </span>
             <div className="flex items-center gap-2">
                <button onClick={() => {}} className="p-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-30"><ChevronLeft className="h-4 w-4 text-slate-400" /></button>

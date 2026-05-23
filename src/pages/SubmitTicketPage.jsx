@@ -18,6 +18,7 @@ import {
   Ticket as TicketIcon,
   ChevronRight,
   Menu,
+  X,
   PlusCircle,
   ArrowRight,
   Loader2,
@@ -43,6 +44,7 @@ const validationSchema = Yup.object({
 export default function SubmitTicketPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [ticketId, setTicketId] = useState('');
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const formik = useFormik({
     initialValues: {
@@ -114,32 +116,80 @@ export default function SubmitTicketPage() {
   return (
     <div className="min-h-screen bg-[#FBFCFF] font-sans text-slate-900">
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/70 backdrop-blur-xl border-b border-slate-100 h-20 flex items-center justify-between px-8 md:px-12">
-        <Link to="/" className="flex items-center gap-3 group">
-          <div className="bg-[#1034A6] p-2 rounded-xl group-hover:rotate-6 transition-transform">
-            <TicketIcon className="h-5 w-5 text-white" />
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/70 backdrop-blur-xl border-b border-slate-100">
+        <div className="h-20 flex items-center justify-between px-8 md:px-12">
+          <Link to="/" className="flex items-center gap-3 group">
+            <div className="bg-[#1034A6] p-2 rounded-xl group-hover:rotate-6 transition-transform">
+              <TicketIcon className="h-5 w-5 text-white" />
+            </div>
+            <span className="text-xl font-bold tracking-tighter text-slate-900">Support <span className="text-[#1034A6] italic font-serif">Hub</span></span>
+          </Link>
+          
+          <div className="hidden md:flex items-center gap-10">
+            {[
+              { label: 'Documentation', path: '/docs' },
+              { label: 'System Status', path: '#' },
+            ].map((item) => (
+              <Link key={item.label} to={item.path} className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400 hover:text-slate-900 transition-colors">{item.label}</Link>
+            ))}
+            {localStorage.getItem('token') ? (
+              <Link to="/dashboard" className="bg-[#1034A6] text-white py-2.5 px-6 rounded-xl text-[10px] font-bold uppercase tracking-[0.15em] hover:bg-[#0E2D8E] transition-all">Portal Dashboard</Link>
+            ) : (
+              <Link to="/login" className="bg-[#1034A6] text-white py-2.5 px-6 rounded-xl text-[10px] font-bold uppercase tracking-[0.15em] hover:bg-[#0E2D8E] transition-all">Agent Login</Link>
+            )}
           </div>
-          <span className="text-xl font-bold tracking-tighter text-slate-900">Support <span className="text-[#1034A6] italic font-serif">Hub</span></span>
-        </Link>
-        
-        <div className="hidden md:flex items-center gap-10">
-          {[
-            { label: 'Documentation', path: '/docs' },
-            { label: 'System Status', path: '#' },
-          ].map((item) => (
-            <Link key={item.label} to={item.path} className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400 hover:text-slate-900 transition-colors">{item.label}</Link>
-          ))}
-          {localStorage.getItem('token') ? (
-            <Link to="/dashboard" className="bg-[#1034A6] text-white py-2.5 px-6 rounded-xl text-[10px] font-bold uppercase tracking-[0.15em] hover:bg-[#0E2D8E] transition-all">Portal Dashboard</Link>
-          ) : (
-            <Link to="/login" className="bg-[#1034A6] text-white py-2.5 px-6 rounded-xl text-[10px] font-bold uppercase tracking-[0.15em] hover:bg-[#0E2D8E] transition-all">Agent Login</Link>
-          )}
+          
+          <button 
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="md:hidden p-2 text-slate-600 hover:text-[#1034A6] transition-colors"
+          >
+            {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
         </div>
-        
-        <button className="md:hidden p-2 text-slate-600">
-          <Menu className="h-6 w-6" />
-        </button>
-      </nav>
+
+        {/* Mobile Navigation Overlay */}
+        <motion.div 
+          initial={false}
+          animate={{ height: isMenuOpen ? 'auto' : 0, opacity: isMenuOpen ? 1 : 0 }}
+          className="md:hidden overflow-hidden bg-white border-t border-slate-100"
+        >
+          <div className="px-8 py-6 flex flex-col gap-6">
+            <Link 
+              to="/docs" 
+              className="text-xs font-bold uppercase tracking-widest text-slate-500 hover:text-[#1034A6] transition-colors"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Documentation
+            </Link>
+            <Link 
+              to="#" 
+              className="text-xs font-bold uppercase tracking-widest text-slate-500 hover:text-[#1034A6] transition-colors"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              System Status
+            </Link>
+            <div className="pt-4 border-t border-slate-100">
+              {localStorage.getItem('token') ? (
+                <Link 
+                  to="/dashboard" 
+                  className="block text-center bg-[#1034A6] text-white py-3 px-6 rounded-xl text-xs font-bold uppercase tracking-[0.15em] hover:bg-[#0E2D8E] transition-all shadow-md animate-pulse"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Portal Dashboard
+                </Link>
+              ) : (
+                <Link 
+                  to="/login" 
+                  className="block text-center bg-[#1034A6] text-white py-3 px-6 rounded-xl text-xs font-bold uppercase tracking-[0.15em] hover:bg-[#0E2D8E] transition-all shadow-md"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Agent Login
+                </Link>
+              )}
+            </div>
+          </div>
+        </motion.div>
+      </header>
 
       <main className="pt-20">
         <section className="relative pt-16 md:pt-24 pb-48 overflow-hidden">

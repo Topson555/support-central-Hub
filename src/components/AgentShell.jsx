@@ -5,14 +5,23 @@ import {
   HelpCircle, 
   MessageSquare,
   Menu,
-  X
+  X,
+  Ticket
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 
 export const AgentShell = ({ children, title, subtitle, actions }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+  const [searchQuery, setSearchQueryState] = useState('');
   const user = JSON.parse(localStorage.getItem('user') || '{"name": "Guest", "role": "user"}');
+
+  const handleSearchChange = (val) => {
+    setSearchQueryState(val);
+    const event = new CustomEvent('globalSearch', { detail: val });
+    window.dispatchEvent(event);
+  };
 
   return (
     <div className="flex h-screen bg-[#F1F3F9] overflow-hidden text-slate-900 font-sans">
@@ -21,48 +30,99 @@ export const AgentShell = ({ children, title, subtitle, actions }) => {
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden w-full">
         {/* Top Header */}
-        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 lg:px-8 shrink-0">
-          <div className="flex items-center gap-4 flex-1">
-            <button 
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="lg:hidden p-2.5 bg-slate-50 text-slate-600 rounded-xl border border-slate-200 hover:bg-slate-100 transition-colors"
-            >
-              {isSidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </button>
-            <div className="relative w-full max-w-[400px] hidden sm:block">
-               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 h-3.5 w-3.5" />
-               <input 
-                 type="text" 
-                 placeholder="Search tickets, customers..."
-                 className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2.5 pl-11 pr-4 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-[#1034A6]/10 focus:border-[#1034A6] transition-all outline-none"
-               />
+        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 lg:px-8 shrink-0 relative">
+          {isMobileSearchOpen ? (
+            <div className="flex-1 flex items-center gap-3 animate-fadeIn duration-150">
+              <button 
+                onClick={() => {
+                  setIsMobileSearchOpen(false);
+                  handleSearchChange('');
+                }}
+                className="p-2.5 bg-slate-50 text-slate-600 rounded-xl border border-slate-200 hover:bg-slate-100 transition-colors shrink-0"
+                aria-label="Close search"
+              >
+                <X className="h-4.5 w-4.5" />
+              </button>
+              <div className="relative flex-1">
+                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 h-3.5 w-3.5" />
+                 <input 
+                   type="text" 
+                   autoFocus
+                   placeholder="Search tickets, customers, categories..."
+                   value={searchQuery}
+                   onChange={(e) => handleSearchChange(e.target.value)}
+                   className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2 pl-11 pr-4 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-[#1034A6]/10 focus:border-[#1034A6] transition-all outline-none"
+                 />
+              </div>
             </div>
-          </div>
-          
-          <div className="flex items-center gap-4 md:gap-4">
-            <div className="flex items-center gap-1 md:gap-2">
-              <button className="relative p-2 text-slate-400 hover:bg-slate-50 rounded-lg transition-colors">
-                <Bell className="h-5 w-5" />
-                <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full border border-white" />
-              </button>
-              <button className="hidden md:block p-2 text-slate-400 hover:bg-slate-50 rounded-lg transition-colors">
-                <HelpCircle className="h-5 w-5" />
-              </button>
-              <button className="hidden md:block p-2 text-slate-400 hover:bg-slate-50 rounded-lg transition-colors">
-                <MessageSquare className="h-5 w-5" />
-              </button>
-            </div>
+          ) : (
+            <>
+              <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
+                <button 
+                  onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                  className="lg:hidden p-2.5 bg-slate-50 text-slate-600 rounded-xl border border-slate-200 hover:bg-slate-100 transition-colors mr-1 shrink-0"
+                >
+                  {isSidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                </button>
 
-            <div className="flex items-center gap-3 pl-4 md:pl-4 border-l border-slate-200">
-               <div className="text-right hidden sm:block">
-                  <p className="text-sm font-bold text-slate-900 tracking-tight leading-none">{user.name}</p>
-                  <p className="text-[10px] font-medium text-slate-400 uppercase tracking-widest mt-1">{user.role}</p>
-               </div>
-               <div className="w-9 h-9 rounded-full bg-indigo-100 border border-indigo-200 flex items-center justify-center text-xs font-black text-[#1034A6] shadow-sm uppercase">
-                 {user.name?.[0]}
-               </div>
-            </div>
-          </div>
+                {/* Mobile / Tablet Branding Logo */}
+                <Link to="/dashboard" className="flex lg:hidden items-center gap-2 group mr-2 shrink-0">
+                  <div className="bg-[#1034A6] p-1.5 rounded-lg group-hover:rotate-6 transition-transform">
+                    <Ticket className="h-4 w-4 text-white" />
+                  </div>
+                  <div className="flex flex-col text-left hidden min-[460px]:flex">
+                    <span className="font-sans font-bold text-slate-900 text-sm tracking-tight leading-none">Support Hub</span>
+                    <span className="text-[8px] font-black text-slate-400 mt-0.5 uppercase tracking-widest">{user?.role || 'user'} Portal</span>
+                  </div>
+                </Link>
+
+                <div className="relative w-full max-w-[400px] hidden sm:block">
+                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 h-3.5 w-3.5" />
+                   <input 
+                     type="text" 
+                     placeholder="Search tickets, customers..."
+                     value={searchQuery}
+                     onChange={(e) => handleSearchChange(e.target.value)}
+                     className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2.5 pl-11 pr-4 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-[#1034A6]/10 focus:border-[#1034A6] transition-all outline-none"
+                   />
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-2 md:gap-4 shrink-0 shadow-none">
+                <div className="flex items-center gap-0.5 sm:gap-1">
+                  {/* Mobile Search Trigger */}
+                  <button 
+                    onClick={() => setIsMobileSearchOpen(true)}
+                    className="sm:hidden p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-900 rounded-lg transition-colors"
+                    aria-label="Open search"
+                  >
+                    <Search className="h-5 w-5" />
+                  </button>
+
+                  <button className="relative p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-900 rounded-lg transition-colors">
+                    <Bell className="h-5 w-5" />
+                    <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full border border-white" />
+                  </button>
+                  <button className="p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-900 rounded-lg transition-colors">
+                    <HelpCircle className="h-5 w-5" />
+                  </button>
+                  <button className="p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-900 rounded-lg transition-colors">
+                    <MessageSquare className="h-5 w-5" />
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-3 pl-3 border-l border-slate-200">
+                   <div className="text-right hidden sm:block">
+                      <p className="text-sm font-bold text-slate-900 tracking-tight leading-none">{user.name}</p>
+                      <p className="text-[10px] font-medium text-slate-400 uppercase tracking-widest mt-1">{user.role}</p>
+                   </div>
+                   <div className="w-9 h-9 rounded-full bg-indigo-100 border border-indigo-200 flex items-center justify-center text-xs font-black text-[#1034A6] shadow-sm uppercase shrink-0">
+                     {user.name?.[0]}
+                   </div>
+                </div>
+              </div>
+            </>
+          )}
         </header>
 
         {/* Body */}
