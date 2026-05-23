@@ -29,7 +29,7 @@ const validationSchema = Yup.object({
 export default function LoginPage() {
   const navigate = useNavigate();
 
-  const formik = useFormik({
+const formik = useFormik({
     initialValues: {
       email: '',
       password: '',
@@ -37,29 +37,20 @@ export default function LoginPage() {
     validationSchema,
     onSubmit: async (values, { setSubmitting, setStatus }) => {
       try {
-        const response = await fetchApi('/api/auth/login', {
+        // Use fetchApi directly with an explicit POST method
+        const data = await fetchApi('/api/auth/login', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(values),
         });
 
-        const data = await parseJsonSafe(response);
-
-        if (!response.ok) {
-          const message =
-            data?.error ||
-            data?.message ||
-            (typeof data?.text === 'string' ? data.text : null) ||
-            response.statusText ||
-            'Login failed';
-          throw new Error(message);
+        // If fetchApi succeeded, save data and navigate safely
+        if (data && data.token) {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          navigate('/dashboard');
         }
-
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        
-        navigate('/dashboard');
       } catch (error) {
+        // fetchApi automatically throws an Error(data.error) which drops right here
         setStatus({ error: error.message || 'Invalid credentials. Please try again.' });
       } finally {
         setSubmitting(false);
