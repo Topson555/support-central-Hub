@@ -10,7 +10,9 @@ import {
   BarChart3,
   History,
   X,
-  HelpCircle
+  HelpCircle,
+  Bell,
+  MessageSquare
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '../lib/utils';
@@ -24,6 +26,8 @@ const sidebarItems = [
   { icon: History, label: 'Ticket History', path: '/dashboard/history', roles: ['agent', 'admin'] },
   { icon: BarChart3, label: 'Reports', path: '/dashboard/reports', roles: ['agent', 'admin'] },
   { icon: Users, label: 'User Management', path: '/dashboard/users', roles: ['admin'] },
+  { icon: Bell, label: 'Notifications', path: '/dashboard/notifications', roles: ['user', 'agent', 'admin'] },
+  { icon: MessageSquare, label: 'Discussions Hub', path: '/dashboard/discussions', roles: ['user', 'agent', 'admin'] },
   { icon: HelpCircle, label: 'Help Center', path: '/help', roles: ['user', 'agent', 'admin'] },
   { icon: Settings, label: 'Settings', path: '/dashboard/settings', roles: ['user', 'agent', 'admin'] }
 ];

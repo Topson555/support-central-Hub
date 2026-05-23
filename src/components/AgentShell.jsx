@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Search, 
   Bell, 
@@ -19,7 +19,28 @@ export const AgentShell = ({ children, title, subtitle, actions }) => {
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [searchQuery, setSearchQueryState] = useState('');
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
   const user = JSON.parse(localStorage.getItem('user') || '{"name": "Guest", "role": "user"}');
+
+  useEffect(() => {
+    const updateUnreadCount = () => {
+      const stored = localStorage.getItem('notifications');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        const count = parsed.filter(n => !n.read).length;
+        setUnreadNotificationsCount(count);
+      } else {
+        // Default list has 2 unread (notif-1, notif-2)
+        setUnreadNotificationsCount(2);
+      }
+    };
+
+    updateUnreadCount();
+    window.addEventListener('notificationsUpdated', updateUnreadCount);
+    return () => {
+      window.removeEventListener('notificationsUpdated', updateUnreadCount);
+    };
+  }, []);
 
   const handleSearchChange = (val) => {
     setSearchQueryState(val);
@@ -106,25 +127,27 @@ export const AgentShell = ({ children, title, subtitle, actions }) => {
                     </span>
                   </button>
 
-                  <button className="group relative p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-900 rounded-lg transition-colors">
+                  <Link to="/dashboard/notifications" className="group relative p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-900 rounded-lg transition-colors">
                     <Bell className="h-5 w-5" />
-                    <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full border border-white" />
+                    {unreadNotificationsCount > 0 && (
+                      <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full border border-white" />
+                    )}
                     <span className="absolute top-full left-1/2 -translate-x-1/2 mt-2.5 px-2 py-1 bg-slate-900 text-white text-[10px] font-black tracking-wide rounded shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-150 pointer-events-none whitespace-nowrap z-30 uppercase">
                       Notifications
                     </span>
-                  </button>
-                  <button className="group relative p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-900 rounded-lg transition-colors">
+                  </Link>
+                  <Link to="/help" className="group relative p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-900 rounded-lg transition-colors">
                     <HelpCircle className="h-5 w-5" />
                     <span className="absolute top-full left-1/2 -translate-x-1/2 mt-2.5 px-2 py-1 bg-slate-900 text-white text-[10px] font-black tracking-wide rounded shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-150 pointer-events-none whitespace-nowrap z-30 uppercase">
                       Help Center
                     </span>
-                  </button>
-                  <button className="group relative p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-900 rounded-lg transition-colors">
+                  </Link>
+                  <Link to="/dashboard/discussions" className="group relative p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-900 rounded-lg transition-colors">
                     <MessageSquare className="h-5 w-5" />
                     <span className="absolute top-full left-1/2 -translate-x-1/2 mt-2.5 px-2 py-1 bg-slate-900 text-white text-[10px] font-black tracking-wide rounded shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-150 pointer-events-none whitespace-nowrap z-30 uppercase">
                       Discussions
                     </span>
-                  </button>
+                  </Link>
                 </div>
 
                 <div className="relative">

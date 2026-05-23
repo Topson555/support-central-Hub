@@ -12,6 +12,8 @@ import SettingsPage from './pages/SettingsPage';
 import AgentCreateTicketPage from './pages/AgentCreateTicketPage';
 import HelpCenterPage from './pages/HelpCenterPage';
 import PublicTicketPage from './pages/PublicTicketPage';
+import DiscussionsPage from './pages/DiscussionsPage';
+import NotificationsPage from './pages/NotificationsPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
 
@@ -74,6 +76,16 @@ export default function App() {
         <Route path="/dashboard/settings" element={
           <ProtectedRoute>
             <SettingsPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/dashboard/discussions" element={
+          <ProtectedRoute>
+            <DiscussionsPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/dashboard/notifications" element={
+          <ProtectedRoute>
+            <NotificationsPage />
           </ProtectedRoute>
         } />
 
