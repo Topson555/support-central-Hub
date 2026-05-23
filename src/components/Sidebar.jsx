@@ -30,7 +30,7 @@ const sidebarItems = [
 
 export const Sidebar = ({ isOpen, onClose }) => {
   const location = useLocation();
-  const user = JSON.parse(localStorage.getItem('user') || '{"role": "user"}');
+  const user = JSON.parse(localStorage.getItem('user') || '{"name": "Guest", "role": "user"}');
 
   const logout = () => {
     localStorage.removeItem('token');
@@ -92,7 +92,16 @@ export const Sidebar = ({ isOpen, onClose }) => {
         })}
       </nav>
 
-      <div className="p-6 mt-auto border-t border-slate-200/50">
+      <div className="p-6 mt-auto border-t border-slate-200/50 space-y-4">
+        <div className="flex items-center gap-3 px-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+           <div className="w-9 h-9 rounded-full bg-indigo-100 border border-indigo-200 flex items-center justify-center text-xs font-black text-[#1034A6] shadow-sm uppercase shrink-0">
+             {user.name?.[0]}
+           </div>
+           <div className="text-left min-w-0 flex-1">
+              <p className="text-xs font-bold text-slate-900 tracking-tight leading-none truncate">{user.name}</p>
+              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1.5 truncate">{user.role} Portal</p>
+           </div>
+        </div>
         <button 
           onClick={logout}
           className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-red-50 hover:text-red-600 transition-all w-full font-bold text-[13px] tracking-tight group"
