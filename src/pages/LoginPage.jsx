@@ -1,6 +1,7 @@
 import { motion } from 'motion/react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import { fetchApi } from '../lib/api'; // 👈 Change this to match your file structure
 import { 
   Mail, 
   Lock, 
@@ -36,7 +37,7 @@ export default function LoginPage() {
     validationSchema,
     onSubmit: async (values, { setSubmitting, setStatus }) => {
       try {
-        const response = await fetch('/api/auth/login', {
+        const response = await fetchApi('/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(values),

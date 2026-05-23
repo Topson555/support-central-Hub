@@ -69,4 +69,17 @@ export const api = {
     method: 'POST',
     body: JSON.stringify(data),
   }),
+
+  
+
+  // 🔽 ADD THESE AUTHENTICATION METHODS HERE
+  signup: (userData) => fetchApi('/api/auth/signup', {
+    method: 'POST',
+    body: JSON.stringify(userData),
+  }),
+
+  login: (credentials) => fetchApi('/api/auth/login', {
+    method: 'POST',
+    body: JSON.stringify(credentials),
+  }),
 };
