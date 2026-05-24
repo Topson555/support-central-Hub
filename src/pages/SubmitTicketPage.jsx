@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { 
+import {
   Send, 
   Paperclip, 
   BookOpen, 
@@ -91,7 +91,7 @@ export default function SubmitTicketPage() {
               Reference: {ticketId}
             </div>
             <p className="text-slate-500 font-medium leading-relaxed text-sm">
-              Your inquiry has been successfully queued. Our specialists are ready to help. You can track the real-time progress below.
+              Your inquiry has been successfully queued. **Support Hub AI has initiated an instant diagnostic analysis**—you will find an immediate smart answer and troubleshooting steps waiting in your ticket progress thread right now!
             </p>
           </div>
           <div className="pt-4 space-y-4">

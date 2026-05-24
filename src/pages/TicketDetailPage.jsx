@@ -395,13 +395,13 @@ export default function TicketDetailPage() {
                    <p className="text-slate-400 font-bold uppercase tracking-widest text-xs italic py-4">No communication replies have been posted to this thread yet.</p>
                  ) : (
                    visibleMessages.map((msg, idx) => {
-                     const isAgent = msg.senderRole !== 'user';
+                     const isAgent = msg.senderRole !== 'user' && !(msg.senderName === "Support Hub AI Assistant" || msg.senderEmail === "ai-copilot@supporthub.com");
                      
-                     let bubbleStyle = "bg-slate-50/50 border-slate-150";
-                     let iconBg = "bg-slate-50 text-slate-600 border border-slate-200";
-                     let authorColor = "text-slate-700";
+                     let bubbleStyle = msg.senderName === "Support Hub AI Assistant" ? "bg-violet-50/20 border-violet-100/40 shadow-sm shadow-violet-50/10" : "bg-slate-50/50 border-slate-150";
+                     let iconBg = msg.senderName === "Support Hub AI Assistant" ? "bg-violet-600 text-white border border-violet-500 shadow-md animate-pulse" : "bg-slate-50 text-slate-600 border border-slate-200";
+                     let authorColor = msg.senderName === "Support Hub AI Assistant" ? "text-violet-700 font-extrabold flex items-center gap-1.5" : "text-slate-700";
                      let timeColor = "text-slate-400/60";
-                     let IconComponent = Clock;
+                     let IconComponent = msg.senderName === "Support Hub AI Assistant" ? Sparkles : Clock;
 
                      if (msg.isInternal) {
                        bubbleStyle = "bg-amber-50/30 border-amber-100/50";
@@ -433,7 +433,7 @@ export default function TicketDetailPage() {
                           <div className={cn("p-8 rounded-[32px] border shadow-sm", bubbleStyle)}>
                              <div className="flex justify-between mb-4 text-[10px] font-black uppercase tracking-widest">
                                 <span className={authorColor}>
-                                  {msg.senderName} ({msg.senderRole?.toUpperCase()})
+                                  {msg.senderName === "Support Hub AI Assistant" && <Sparkles className="h-3.5 w-3.5 text-violet-500 inline mr-1 animate-pulse" />}{msg.senderName} ({msg.senderRole?.toUpperCase()})
                                   {msg.isInternal && <span className="ml-2 px-2 py-0.5 bg-amber-100 text-amber-800 rounded-md tracking-wider text-[9px]">Internal Note</span>}
                                 </span>
                                 <span className={cn("font-black italic", timeColor)}>{new Date(msg.createdAt).toLocaleString()}</span>
