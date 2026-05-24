@@ -19,71 +19,37 @@ export default function NotificationsPage() {
   const [notifications, setNotifications] = useState([]);
   const [filter, setFilter] = useState('All');
 
+  const user = JSON.parse(localStorage.getItem('user') || '{"name": "Guest", "role": "user"}');
+  const storageKey = user && user.email ? `notifications_${user.email}` : 'notifications';
+
   // Load and cache
   useEffect(() => {
-    const cached = localStorage.getItem('notifications');
+    const cached = localStorage.getItem(storageKey);
     if (cached) {
       setNotifications(JSON.parse(cached));
     } else {
-      const defaultNotifications = [
-        {
-          id: 'notif-1',
-          type: 'alert',
-          title: '🚨 Urgent Priority Escalation',
-          message: 'Support Ticket #HLP-9201 ("Database latency spike in Production environment") has been automated to urgent priority under Level 1 SLA Rules.',
-          time: new Date(Date.now() - 1000 * 60 * 15).toISOString(), // 15m ago
-          read: false,
-          category: 'Tickets',
-          link: '/ticket/65f492aef3184ae829c910fa'
-        },
-        {
-          id: 'notif-2',
-          type: 'success',
-          title: '✅ Knowledge Base Article Updated',
-          message: 'Your compiled guide "Troubleshooting 403 Forbidden on API webhooks" was approved and published to the live customer Help Center portal.',
-          time: new Date(Date.now() - 3600000 * 2).toISOString(), // 2h ago
-          read: false,
-          category: 'Systems',
-          link: '/help'
-        },
-        {
-          id: 'notif-3',
-          type: 'info',
-          title: '💬 New Collaboration Thread Activity',
-          message: 'Marcus Lee replied to your posted discussion thread: "Best practices for configuring SLA buffer escalation triggers".',
-          time: new Date(Date.now() - 3600000 * 5).toISOString(), // 5h ago
-          read: true,
-          category: 'Discussions',
-          link: '/dashboard/discussions'
-        },
-        {
-          id: 'notif-4',
-          type: 'warning',
-          title: '⚠️ Integrations Action Required',
-          message: 'The Corporate Slack hook gateway reported visual rendering packet loss (Status: 429 API rate limits exceeded). Buffer delayed.',
-          time: new Date(Date.now() - 86400000).toISOString(), // 1d ago
-          read: true,
-          category: 'Systems'
-        },
-        {
-          id: 'notif-5',
-          type: 'info',
-          title: '👤 Account Authentication Checked',
-          message: 'Successful support portal session authenticated via Chrome browser on IP address 192.168.1.18.',
-          time: new Date(Date.now() - 86400000 * 2).toISOString(), // 2d ago
-          read: true,
-          category: 'Security',
-          link: '/dashboard/settings'
-        }
-      ];
+      const isStaff = user.role === 'agent' || user.role === 'admin';
+      const welcomeNotif = {
+        id: `welcome-${user.email || 'guest'}`,
+        type: 'info',
+        title: '✨ Welcome to Support Hub 24/7!',
+        message: isStaff 
+          ? 'Access your unified response desk. Live tickets, automatic SLA escalations, and AI copilot drafts are routed here instantly.'
+          : `Hello ${user.name || 'Valued Customer'}! Your live dashboard is connected. Any ticket you submit will show status updates and instant AI diagnostic help here.`,
+        time: new Date().toISOString(),
+        read: false,
+        category: 'Systems',
+        link: isStaff ? '/dashboard' : '/dashboard/submit-ticket'
+      };
+      const defaultNotifications = [welcomeNotif];
       setNotifications(defaultNotifications);
-      localStorage.setItem('notifications', JSON.stringify(defaultNotifications));
+      localStorage.setItem(storageKey, JSON.stringify(defaultNotifications));
     }
-  }, []);
+  }, [storageKey]);
 
   const saveNotifications = (updated) => {
     setNotifications(updated);
-    localStorage.setItem('notifications', JSON.stringify(updated));
+    localStorage.setItem(storageKey, JSON.stringify(updated));
     // Dispatch a global event to keep other headers synced
     window.dispatchEvent(new CustomEvent('notificationsUpdated'));
   };

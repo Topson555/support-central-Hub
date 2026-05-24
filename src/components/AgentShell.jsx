@@ -29,10 +29,11 @@ export const AgentShell = ({ children, title, subtitle, actions }) => {
   const [isNotificationsDropdownOpen, setIsNotificationsDropdownOpen] = useState(false);
   const [notificationsList, setNotificationsList] = useState([]);
   const user = JSON.parse(localStorage.getItem('user') || '{"name": "Guest", "role": "user"}');
+  const storageKey = user && user.email ? `notifications_${user.email}` : 'notifications';
 
   useEffect(() => {
     const updateUnreadCount = () => {
-      const stored = localStorage.getItem('notifications');
+      const stored = localStorage.getItem(storageKey);
       if (stored) {
         try {
           const parsed = JSON.parse(stored);
@@ -44,9 +45,24 @@ export const AgentShell = ({ children, title, subtitle, actions }) => {
           setNotificationsList([]);
         }
       } else {
-        // Default list fallback
-        setUnreadNotificationsCount(2);
-        setNotificationsList([]);
+        // Build dynamic welcome notification customized for the specific user's role
+        const isStaff = user.role === 'agent' || user.role === 'admin';
+        const welcomeNotif = {
+          id: `welcome-${user.email || 'guest'}`,
+          type: 'info',
+          title: '✨ Welcome to Support Hub 24/7!',
+          message: isStaff 
+            ? 'Access your unified response desk. Live tickets, automatic SLA escalations, and AI copilot drafts are routed here instantly.'
+            : `Hello ${user.name || 'Valued Customer'}! Your live dashboard is connected. Any ticket you submit will show status updates and instant AI diagnostic help here.`,
+          time: new Date().toISOString(),
+          read: false,
+          category: 'Systems',
+          link: isStaff ? '/dashboard' : '/dashboard/submit-ticket'
+        };
+        const initial = [welcomeNotif];
+        localStorage.setItem(storageKey, JSON.stringify(initial));
+        setUnreadNotificationsCount(1);
+        setNotificationsList(initial);
       }
     };
 
@@ -55,7 +71,7 @@ export const AgentShell = ({ children, title, subtitle, actions }) => {
     return () => {
       window.removeEventListener('notificationsUpdated', updateUnreadCount);
     };
-  }, []);
+  }, [storageKey]);
 
   // Socket notification handling
   useEffect(() => {
@@ -66,7 +82,7 @@ export const AgentShell = ({ children, title, subtitle, actions }) => {
       const isOwnTicket = ticket.email === user.email;
 
       if (isStaff || isOwnTicket) {
-        const stored = localStorage.getItem('notifications');
+        const stored = localStorage.getItem(storageKey);
         let currentList = [];
         if (stored) {
           try {
@@ -94,7 +110,7 @@ export const AgentShell = ({ children, title, subtitle, actions }) => {
         };
 
         const updated = [newNotif, ...currentList];
-        localStorage.setItem('notifications', JSON.stringify(updated));
+        localStorage.setItem(storageKey, JSON.stringify(updated));
         window.dispatchEvent(new CustomEvent('notificationsUpdated'));
       }
     };
@@ -104,7 +120,7 @@ export const AgentShell = ({ children, title, subtitle, actions }) => {
       const isOwnTicket = ticket.email === user.email;
 
       if (isStaff || isOwnTicket) {
-        const stored = localStorage.getItem('notifications');
+        const stored = localStorage.getItem(storageKey);
         let currentList = [];
         if (stored) {
           try {
@@ -153,7 +169,7 @@ export const AgentShell = ({ children, title, subtitle, actions }) => {
           }
         }
 
-        localStorage.setItem('notifications', JSON.stringify(updatedList));
+        localStorage.setItem(storageKey, JSON.stringify(updatedList));
         window.dispatchEvent(new CustomEvent('notificationsUpdated'));
       }
     };
@@ -165,17 +181,17 @@ export const AgentShell = ({ children, title, subtitle, actions }) => {
       socket.off("ticket:created", handleTicketCreated);
       socket.off("ticket:updated", handleTicketUpdated);
     };
-  }, [user?.email, user?.role]);
+  }, [user?.email, user?.role, storageKey]);
 
   const handleMarkAsRead = (id) => {
     const updated = notificationsList.map(n => n.id === id ? { ...n, read: true } : n);
-    localStorage.setItem('notifications', JSON.stringify(updated));
+    localStorage.setItem(storageKey, JSON.stringify(updated));
     window.dispatchEvent(new CustomEvent('notificationsUpdated'));
   };
 
   const handleMarkAllAsRead = () => {
     const updated = notificationsList.map(n => ({ ...n, read: true }));
-    localStorage.setItem('notifications', JSON.stringify(updated));
+    localStorage.setItem(storageKey, JSON.stringify(updated));
     window.dispatchEvent(new CustomEvent('notificationsUpdated'));
   };
 
