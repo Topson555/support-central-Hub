@@ -284,7 +284,7 @@ export const AgentShell = ({ children, title, subtitle, actions }) => {
                           className="fixed inset-0 z-15" 
                           onClick={() => setIsNotificationsDropdownOpen(false)}
                         />
-                        <div className="absolute right-0 mt-2.5 w-80 sm:w-96 bg-white border border-slate-200 rounded-[20px] shadow-xl py-3 z-20 animate-fadeIn text-left">
+                        <div className="fixed sm:absolute top-[72px] sm:top-auto left-4 right-4 sm:left-auto sm:right-0 sm:mt-2.5 w-auto sm:w-96 bg-white border border-slate-200 rounded-[20px] shadow-xl py-3 z-30 animate-fadeIn text-left">
                           <div className="px-4 pb-2 border-b border-slate-100 flex items-center justify-between">
                             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
                               Recent Alerts ({unreadNotificationsCount} unread)
