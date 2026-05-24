@@ -9,7 +9,8 @@ import {
   MessageSquare,
   Filter,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Search
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
@@ -31,6 +32,11 @@ export default function DashboardPage() {
     resolved: 0
   });
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [sortBy, setSortBy] = useState('newest');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
   
   const navigate = useNavigate();
 
@@ -204,10 +210,102 @@ export default function DashboardPage() {
 
       {/* Ticket Management Section */}
       <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
-         <div className="px-10 py-8 border-b border-slate-100 flex items-center justify-between">
+         <div className="px-10 py-8 border-b border-slate-100 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <h3 className="text-xl font-bold text-slate-900 tracking-tight">{user?.role === 'user' ? 'Recent Inquiries' : 'Ticket Management'}</h3>
             <div className="flex items-center gap-4">
                <button className="text-slate-400 hover:text-slate-600 transition-colors"><MoreVertical className="h-5 w-5" /></button>
+            </div>
+         </div>
+
+         {/* Multi-faceted Filter Workspace */}
+         <div className="px-10 py-5 bg-slate-50/50 border-b border-slate-100 flex flex-col lg:flex-row gap-4 justify-between items-stretch lg:items-center">
+            {/* Search Input and Select Dropdowns */}
+            <div className="flex-1 flex flex-col sm:flex-row gap-3">
+               {/* Context-aware Local Search Bar */}
+               <div className="relative flex-1">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 h-4 w-4" />
+                  <input
+                     type="text"
+                     placeholder="Search ID, customer, title..."
+                     value={searchQuery}
+                     onChange={(e) => {
+                       setSearchQuery(e.target.value);
+                       // Notify shell search bar to stay in sync
+                       window.dispatchEvent(new CustomEvent('globalSearch', { detail: e.target.value }));
+                       setCurrentPage(1); // Reset page selection on filter
+                     }}
+                     className="w-full bg-white border border-slate-200 rounded-xl py-2 pl-11 pr-4 text-xs font-semibold focus:ring-2 focus:ring-[#1034A6]/10 focus:border-[#1034A6] outline-none transition-all placeholder:text-slate-400"
+                  />
+               </div>
+
+               {/* Category Filter */}
+               <div className="relative shrink-0">
+                  <select
+                     value={selectedCategory}
+                     onChange={(e) => {
+                       setSelectedCategory(e.target.value);
+                       setCurrentPage(1);
+                     }}
+                     className="w-full sm:w-48 bg-white border border-slate-200 rounded-xl px-4 py-2 text-xs font-bold text-slate-600 outline-none cursor-pointer focus:ring-2 focus:ring-[#1034A6]/10 focus:border-[#1034A6] transition-all"
+                  >
+                     <option value="all">All Categories</option>
+                     {Array.from(new Set(tickets.map(t => t.category).filter(Boolean))).map(cat => (
+                        <option key={cat} value={cat}>{cat}</option>
+                     ))}
+                  </select>
+               </div>
+
+               {/* Sort Order dropdown */}
+               <div className="relative shrink-0">
+                  <select
+                     value={sortBy}
+                     onChange={(e) => {
+                       setSortBy(e.target.value);
+                       setCurrentPage(1);
+                     }}
+                     className="w-full sm:w-40 bg-white border border-slate-200 rounded-xl px-4 py-2 text-xs font-bold text-slate-600 outline-none cursor-pointer focus:ring-2 focus:ring-[#1034A6]/10 focus:border-[#1034A6] transition-all"
+                  >
+                     <option value="newest">Newest First</option>
+                     <option value="oldest">Oldest First</option>
+                     <option value="updated">Latest Activity</option>
+                  </select>
+               </div>
+            </div>
+
+            {/* Status Pills */}
+            <div className="flex items-center gap-1.5 overflow-x-auto py-1 scrollbar-none shrink-0 border-t lg:border-t-0 pt-3 lg:pt-0 border-slate-100">
+               {['all', 'open', 'pending', 'resolved', 'closed'].map(statusName => {
+                  const label = statusName.toUpperCase();
+                  const count = statusName === 'all' 
+                     ? tickets.length 
+                     : tickets.filter(t => t.status?.toLowerCase() === statusName).length;
+                  
+                  const isSelected = selectedStatus === statusName;
+                  
+                  return (
+                     <button
+                        key={statusName}
+                        onClick={() => {
+                          setSelectedStatus(statusName);
+                          setCurrentPage(1);
+                        }}
+                        className={cn(
+                          "px-3.5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer border flex items-center gap-1.5 shrink-0 select-none",
+                          isSelected 
+                            ? "bg-[#1034A6] text-white border-transparent shadow-sm"
+                            : "bg-white text-slate-500 border-slate-200 hover:text-slate-800 hover:bg-slate-50"
+                        )}
+                     >
+                        {label === 'ALL' ? 'ALL CASES' : label}
+                        <span className={cn(
+                          "ml-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-black leading-none",
+                          isSelected ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"
+                        )}>
+                           {count}
+                        </span>
+                     </button>
+                  );
+               })}
             </div>
          </div>
          
@@ -230,14 +328,35 @@ export default function DashboardPage() {
                     </tr>
                   ) : tickets.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="py-20 text-center text-slate-400 font-medium">No records found.</td>
+                      <td colSpan={6} className="py-24 px-6 text-center select-none">
+                        <div className="max-w-md mx-auto flex flex-col items-center">
+                          <div className="w-16 h-16 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 mb-6 shadow-sm">
+                            <ClipboardList className="h-7 w-7" />
+                          </div>
+                          <h4 className="text-base font-black text-slate-800 tracking-tight mb-2">
+                            No Support Tickets Available
+                          </h4>
+                          <p className="text-xs text-slate-500 font-medium leading-relaxed mb-6">
+                            {user?.role === 'user' 
+                              ? "Your ticket list is currently empty. If you are experiencing technical difficulties, open a technical ticket or request billing assistance."
+                              : "The ticket desk is fully cleared. There are currently no client inquiries or incidents requiring allocation."}
+                          </p>
+                          {user?.role === 'user' && (
+                            <Link
+                              to="/dashboard/submit-ticket"
+                              className="bg-[#1034A6] hover:bg-[#1034A6]/90 text-white font-bold text-xs px-6 py-2.5 rounded-xl transition-all shadow-sm active:scale-95 cursor-pointer inline-flex items-center gap-2"
+                            >
+                              <PlusCircle className="h-4 w-4" /> Open Support Inquiry
+                            </Link>
+                          )}
+                        </div>
+                      </td>
                     </tr>
                   ) : (
-                    (() => {
+                     (() => {
                       const filteredTickets = tickets.filter(t => {
-                        if (!searchQuery) return true;
                         const query = searchQuery.toLowerCase();
-                        return (
+                        const matchesSearch = !searchQuery || (
                           t._id?.toLowerCase().includes(query) ||
                           t.subject?.toLowerCase().includes(query) ||
                           t.customer?.toLowerCase().includes(query) ||
@@ -245,17 +364,75 @@ export default function DashboardPage() {
                           t.category?.toLowerCase().includes(query) ||
                           t.status?.toLowerCase().includes(query)
                         );
+
+                        const matchesStatus = selectedStatus === 'all' || t.status?.toLowerCase() === selectedStatus;
+                        const matchesCategory = selectedCategory === 'all' || t.category === selectedCategory;
+
+                        return matchesSearch && matchesStatus && matchesCategory;
                       });
 
-                      if (filteredTickets.length === 0) {
+                      const sortedTickets = [...filteredTickets].sort((a, b) => {
+                        if (sortBy === 'oldest') {
+                          return new Date(a.createdAt) - new Date(b.createdAt);
+                        } else if (sortBy === 'updated') {
+                          return new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt);
+                        } else {
+                          return new Date(b.createdAt) - new Date(a.createdAt);
+                        }
+                      });
+
+                      const totalPages = Math.ceil(sortedTickets.length / itemsPerPage);
+                      const safeCurrentPage = Math.min(currentPage, Math.max(1, totalPages));
+                      const startIndex = (safeCurrentPage - 1) * itemsPerPage;
+                      const endIndex = startIndex + itemsPerPage;
+                      const paginatedTickets = sortedTickets.slice(startIndex, endIndex);
+
+                      if (sortedTickets.length === 0) {
                         return (
                           <tr>
-                            <td colSpan={6} className="py-20 text-center text-slate-400 font-medium">No matching records found.</td>
+                            <td colSpan={6} className="py-24 px-6 text-center select-none">
+                              <div className="max-w-md mx-auto flex flex-col items-center">
+                                <div className="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-500 mb-6 shadow-sm">
+                                  <Search className="h-7 w-7" />
+                                </div>
+                                <h4 className="text-base font-black text-slate-900 tracking-tight mb-2">
+                                  Search Result Not Available
+                                </h4>
+                                <p className="text-xs text-slate-500 font-medium leading-relaxed mb-6">
+                                  We couldn't locate any support tickets matching the query{" "}
+                                  <span className="font-bold font-mono text-[#1034A6] bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
+                                    "{searchQuery}"
+                                  </span>
+                                  {selectedCategory !== 'all' || selectedStatus !== 'all' ? " with current categorizations." : "."} Please check your spelling or verify options.
+                                </p>
+                                <div className="flex flex-wrap gap-3 items-center justify-center">
+                                  <button
+                                    onClick={() => {
+                                      setSearchQuery('');
+                                      setSelectedStatus('all');
+                                      setSelectedCategory('all');
+                                      window.dispatchEvent(new CustomEvent('globalSearch', { detail: '' }));
+                                    }}
+                                    className="bg-[#1034A6] hover:bg-[#1034A6]/90 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition-all shadow-sm active:scale-95 cursor-pointer flex items-center gap-2"
+                                  >
+                                    Reset Search & Filters
+                                  </button>
+                                  {user?.role === 'user' && (
+                                    <Link
+                                      to="/dashboard/submit-ticket"
+                                      className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-bold text-xs px-5 py-2.5 rounded-xl transition-all shadow-sm active:scale-95 cursor-pointer inline-flex items-center gap-2"
+                                    >
+                                      Submit a Ticket Instead
+                                    </Link>
+                                  )}
+                                </div>
+                              </div>
+                            </td>
                           </tr>
                         );
                       }
 
-                      return filteredTickets.map((t) => (
+                      return paginatedTickets.map((t) => (
                         <tr 
                           key={t._id} 
                           onClick={() => navigate(`/ticket/${t._id}`)}
@@ -325,25 +502,60 @@ export default function DashboardPage() {
             </table>
          </div>
 
-         <div className="px-10 py-6 border-t border-slate-50 flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-400">
-               Showing {tickets.length > 0 ? (tickets.filter(t => {
-                 if (!searchQuery) return true;
-                 const query = searchQuery.toLowerCase();
-                 return (
-                   t._id?.toLowerCase().includes(query) ||
-                   t.subject?.toLowerCase().includes(query) ||
-                   t.customer?.toLowerCase().includes(query) ||
-                   t.email?.toLowerCase().includes(query) ||
-                   t.category?.toLowerCase().includes(query) ||
-                   t.status?.toLowerCase().includes(query)
-                 );
-               }).length) : 0} of {stats.total} records
-            </span>
-            <div className="flex items-center gap-2">
-               <button onClick={() => {}} className="p-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-30"><ChevronLeft className="h-4 w-4 text-slate-400" /></button>
-               <button onClick={() => {}} className="p-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-30"><ChevronRight className="h-4 w-4 text-slate-400" /></button>
-            </div>
+         <div className="px-10 py-6 border-t border-slate-50 flex flex-col sm:flex-row gap-4 items-center justify-between">
+            {(() => {
+              const filteredTickets = tickets.filter(t => {
+                const query = searchQuery.toLowerCase();
+                const matchesSearch = !searchQuery || (
+                  t._id?.toLowerCase().includes(query) ||
+                  t.subject?.toLowerCase().includes(query) ||
+                  t.customer?.toLowerCase().includes(query) ||
+                  t.email?.toLowerCase().includes(query) ||
+                  t.category?.toLowerCase().includes(query) ||
+                  t.status?.toLowerCase().includes(query)
+                );
+
+                const matchesStatus = selectedStatus === 'all' || t.status?.toLowerCase() === selectedStatus;
+                const matchesCategory = selectedCategory === 'all' || t.category === selectedCategory;
+
+                return matchesSearch && matchesStatus && matchesCategory;
+              });
+
+              const totalPages = Math.ceil(filteredTickets.length / itemsPerPage);
+              const safeCurrentPage = Math.min(currentPage, Math.max(1, totalPages));
+              const startIndex = filteredTickets.length > 0 ? (safeCurrentPage - 1) * itemsPerPage : 0;
+              const endIndex = Math.min(startIndex + itemsPerPage, filteredTickets.length);
+
+              return (
+                <>
+                  <span className="text-xs font-semibold text-slate-400">
+                     Showing {filteredTickets.length > 0 ? startIndex + 1 : 0} to {endIndex} of {filteredTickets.length} records 
+                     {selectedStatus !== 'all' || selectedCategory !== 'all' || searchQuery ? ' (filtered)' : ''}
+                  </span>
+                  <div className="flex items-center gap-3">
+                     <button 
+                        disabled={safeCurrentPage <= 1}
+                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                        className="p-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                        aria-label="Previous page"
+                     >
+                        <ChevronLeft className="h-4 w-4 text-slate-400" />
+                     </button>
+                     <span className="text-xs font-bold text-slate-500 min-w-[70px] text-center select-none">
+                        Page {safeCurrentPage} of {Math.max(1, totalPages)}
+                     </span>
+                     <button 
+                        disabled={safeCurrentPage >= totalPages}
+                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                        className="p-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                        aria-label="Next page"
+                     >
+                        <ChevronRight className="h-4 w-4 text-slate-400" />
+                     </button>
+                  </div>
+                </>
+              );
+            })()}
          </div>
       </div>
 
