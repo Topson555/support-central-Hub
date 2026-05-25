@@ -1,6 +1,3 @@
-/**
- * API Utility for authenticated requests
- */
 const BASE_URL = import.meta.env.VITE_API_URL || 'https://backend-support-hub.onrender.com';
 
 export const fetchApi = async (endpoint, options = {}) => {
@@ -81,5 +78,9 @@ export const api = {
   login: (credentials) => fetchApi('/api/auth/login', {
     method: 'POST',
     body: JSON.stringify(credentials),
+  }),
+  updateProfile: (profileData) => fetchApi('/api/auth/profile', {
+    method: 'PUT',
+    body: JSON.stringify(profileData),
   }),
 };

@@ -19,8 +19,9 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { cn } from '../lib/utils';
+// 1. Changed import to tap into your centralized API collection object
+import { api } from '../lib/api'; 
 
-// Stunning color presets for users who want quick solid avatar backgrounds
 const AVATAR_PRESETS = [
   { name: 'Classic Indigo', class: 'bg-gradient-to-tr from-indigo-600 to-indigo-400 text-white' },
   { name: 'Warm Amber', class: 'bg-gradient-to-tr from-amber-500 to-amber-300 text-white' },
@@ -33,7 +34,6 @@ const AVATAR_PRESETS = [
 export default function SettingsPage() {
   const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user') || '{"name": "Guest", "role": "user"}'));
   
-  // Profile Editable states
   const [name, setName] = useState(user.name || '');
   const [email, setEmail] = useState(user.email || '');
   const [phoneNumber, setPhoneNumber] = useState(user.phoneNumber || '');
@@ -41,24 +41,20 @@ export default function SettingsPage() {
   const [department, setDepartment] = useState(user.department || '');
   const [avatar, setAvatar] = useState(user.avatar || '');
 
-  // UI Control states
-  const [activeTab, setActiveTab] = useState('profile'); // 'profile' | 'system'
+  const [activeTab, setActiveTab] = useState('profile');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [dragOver, setDragOver] = useState(false);
 
-  // Sync user details state if changed externally or on mount
   useEffect(() => {
     const updatedUser = JSON.parse(localStorage.getItem('user') || '{"name": "Guest", "role": "user"}');
     setUser(updatedUser);
   }, []);
 
-  // Process File Uploads (Base64 encoding so it saves securely to user profile in DB)
   const handleFileUpload = (file) => {
     if (!file) return;
 
-    // Check size limit (e.g., 2MB)
     if (file.size > 2 * 1024 * 1024) {
       setError('File is too large. Choose a picture under 2MB.');
       setTimeout(() => setError(''), 5000);
@@ -73,7 +69,7 @@ export default function SettingsPage() {
 
     const reader = new FileReader();
     reader.onload = (e) => {
-      setAvatar(e.target.result); // Base64 representation of image
+      setAvatar(e.target.result);
     };
     reader.readAsDataURL(file);
   };
@@ -103,28 +99,17 @@ export default function SettingsPage() {
     setSuccess('');
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/auth/profile', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          avatar,
-          phoneNumber,
-          jobTitle,
-          department
-        })
+      // 2. Clean call straight to your endpoint mapping wrapper
+      const data = await api.updateProfile({
+        name,
+        email,
+        avatar,
+        phoneNumber,
+        jobTitle,
+        department
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to update profile information.');
-      }
+      // 3. Removed 'const data = await response.json();' entirely since it's pre-parsed.
 
       // Update Session Stores and notify layout UI components
       const updatedUser = {
@@ -141,7 +126,6 @@ export default function SettingsPage() {
       localStorage.setItem('user', JSON.stringify(updatedUser));
       setUser(updatedUser);
       
-      // Notify components like AgentShell and Sidebar of the user change state
       window.dispatchEvent(new CustomEvent('userProfileUpdated'));
       
       setSuccess('Your profile was updated successfully!');
@@ -217,7 +201,6 @@ export default function SettingsPage() {
               </h3>
 
               <div className="flex flex-col md:flex-row items-center gap-8">
-                {/* Drag 'n Drop Profile picture Previewer */}
                 <div 
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
@@ -249,7 +232,6 @@ export default function SettingsPage() {
                   />
                 </div>
 
-                {/* Side Instructions & Delete capability */}
                 <div className="flex-1 space-y-4">
                   <div className="space-y-1">
                     <p className="text-xs font-bold text-slate-700">Display Photograph</p>
@@ -270,7 +252,6 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              {/* Vector Preset suggestions for quicker profile setup */}
               <div className="pt-4 border-t border-slate-100">
                 <p className="text-[11px] font-black uppercase text-slate-400 tracking-wider mb-3">Or choose a stylish solid palette background:</p>
                 <div className="grid grid-cols-2 sm:grid-cols-6 gap-2">
