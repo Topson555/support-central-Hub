@@ -38,14 +38,14 @@ export default function LandingPage() {
 
           <div className="flex items-center gap-4">
             {localStorage.getItem('token') ? (
-              <Link to="/dashboard" className="rounded-xl bg-[#1034A6] px-5 py-2.5 text-[11px] font-bold uppercase tracking-wider text-white shadow-md transition-all hover:bg-[#0E2D8E] active:scale-95 shadow-indigo-100">
+              <Link to="/dashboard" className="hidden sm:inline-block rounded-xl bg-[#1034A6] px-5 py-2.5 text-[11px] font-bold uppercase tracking-wider text-white shadow-md transition-all hover:bg-[#0E2D8E] active:scale-95 shadow-indigo-100">
                 Go to Dashboard
               </Link>
             ) : (
               <>
-                <Link to="/login" className="hidden xs:block text-[11px] font-bold uppercase tracking-wider text-slate-500 hover:text-[#1034A6] transition-colors px-2">Login</Link>
+                <Link to="/login" className="hidden md:inline-block text-[11px] font-bold uppercase tracking-wider text-slate-500 hover:text-[#1034A6] transition-colors px-2">Login</Link>
                 <Link to="/signup" 
-                  className="rounded-xl bg-[#1034A6] px-5 py-2.5 text-[11px] font-bold uppercase tracking-wider text-white shadow-md transition-all hover:bg-[#0E2D8E] active:scale-95 shadow-indigo-100"
+                  className="hidden sm:inline-block rounded-xl bg-[#1034A6] px-5 py-2.5 text-[11px] font-bold uppercase tracking-wider text-white shadow-md transition-all hover:bg-[#0E2D8E] active:scale-95 shadow-indigo-100"
                 >
                   Get Started
                 </Link>
@@ -56,6 +56,7 @@ export default function LandingPage() {
             <button 
               className="lg:hidden p-2 text-slate-500 hover:text-[#1034A6] transition-colors"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label="Toggle Navigation Menu"
             >
               {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
@@ -90,20 +91,39 @@ export default function LandingPage() {
             >
               Resources
             </Link>
-            <div className="pt-4 border-t border-slate-100 flex flex-col gap-4">
-              <Link 
-                to="/login" 
-                className="text-xs font-bold uppercase tracking-widest text-slate-500"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Agent Login
-              </Link>
+            <div className="pt-6 border-t border-slate-100 flex flex-col gap-4">
+              {localStorage.getItem('token') ? (
+                <Link 
+                  to="/dashboard" 
+                  className="rounded-xl bg-[#1034A6] py-3 text-xs font-bold uppercase tracking-widest text-white shadow-md text-center active:scale-98 transition-transform"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Go to Dashboard
+                </Link>
+              ) : (
+                <>
+                  <Link 
+                    to="/login" 
+                    className="text-xs font-bold uppercase tracking-widest text-slate-500 py-1"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Agent Login / Member Sign In
+                  </Link>
+                  <Link 
+                    to="/signup" 
+                    className="rounded-xl bg-[#1034A6] py-3 text-xs font-bold uppercase tracking-widest text-white shadow-md text-center active:scale-98 transition-transform"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Get Started (Register)
+                  </Link>
+                </>
+              )}
               <Link 
                 to="/submit" 
-                className="text-xs font-bold uppercase tracking-widest text-[#1034A6]"
+                className="text-xs font-bold uppercase tracking-widest text-[#1034A6] py-1 mt-2 border-t border-slate-50 pt-3"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Submit Ticket
+                Submit Technical Ticket
               </Link>
             </div>
           </div>
