@@ -47,3 +47,107 @@
     @apply mb-4;
   }
 }
+
+
+/* Premium Smooth Transitions */
+body, .bg-white, .bg-slate-50, .border-slate-100, .border-slate-200, input, select, textarea, button, p, h1, h2, h3, h4, span, div, svg {
+  transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease;
+}
+
+/* Dark Mode Overrides */
+html.dark {
+  color-scheme: dark;
+}
+
+.dark body {
+  background-color: #0d111d !important;
+  color: #f3f4f6 !important;
+}
+
+.dark .bg-\[\#F1F3F9\],
+.dark .bg-slate-100 {
+  background-color: #0d111d !important;
+}
+
+.dark .bg-white {
+  background-color: #161b2e !important;
+}
+
+.dark .bg-slate-50,
+.dark .bg-\[\#FBFCFF\],
+.dark .bg-\[\#F1F3F9\]\/30,
+.dark .bg-slate-50\/30,
+.dark .bg-slate-50\/40,
+.dark .bg-slate-50\/50,
+.dark .bg-slate-50\/80 {
+  background-color: #1e2540 !important;
+}
+
+.dark .bg-indigo-50 {
+  background-color: #1a1f33 !important;
+}
+
+/* Borders */
+.dark .border-slate-100,
+.dark .border-slate-200,
+.dark .border-slate-200\/50,
+.dark .border-slate-200\/60,
+.dark .border-\[2px\] {
+  border-color: #212a45 !important;
+}
+
+.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
+.dark .divide-slate-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #212a45 !important;
+}
+
+/* Text Colors */
+.dark .text-slate-900,
+.dark .text-slate-850,
+.dark .text-slate-800,
+.dark .text-slate-700 {
+  color: #f3f4f6 !important;
+}
+
+.dark .text-slate-600,
+.dark .text-slate-500 {
+  color: #9cb3d5 !important;
+}
+
+.dark .text-slate-400 {
+  color: #8198bd !important;
+}
+
+/* Form controls & Interaction */
+.dark input, 
+.dark select, 
+.dark textarea {
+  background-color: #1e2540 !important;
+  color: #f3f4f6 !important;
+  border-color: #2b3558 !important;
+}
+
+.dark input::placeholder, 
+.dark textarea::placeholder {
+  color: #64748b !important;
+}
+
+/* Hover mechanisms */
+.dark .hover\:bg-slate-50:hover,
+.dark .hover\:bg-slate-100:hover,
+.dark .hover\:bg-slate-50\/40:hover,
+.dark .hover\:bg-slate-50\/50:hover,
+.dark .hover\:bg-blue-50:hover {
+  background-color: #262e4f !important;
+}
+
+/* Table formats */
+.dark table th {
+  background-color: #1c223c !important;
+  color: #9cb3d5 !important;
+}
+
+.dark table tr:hover {
+  background-color: #1a2037 !important;
+}
+

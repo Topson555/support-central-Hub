@@ -3,6 +3,10 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App.jsx';
 import './index.css';
+import { initSystemTheme } from './lib/theme.js';
+
+// Initialize dark/light theme state before mounting
+initSystemTheme();
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

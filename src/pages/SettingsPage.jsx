@@ -16,9 +16,12 @@ import {
   Loader2, 
   Upload, 
   Trash2,
-  AlertCircle
+  AlertCircle,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { getSystemTheme, setSystemTheme } from '../lib/theme';
 // 1. Changed import to tap into your centralized API collection object
 import { api } from '../lib/api'; 
 
@@ -46,6 +49,17 @@ export default function SettingsPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [dragOver, setDragOver] = useState(false);
+  const [theme, setThemeState] = useState(() => getSystemTheme());
+
+  useEffect(() => {
+    const handleThemeUpdate = (e) => {
+      setThemeState(e.detail?.theme || getSystemTheme());
+    };
+    window.addEventListener('themeUpdated', handleThemeUpdate);
+    return () => {
+      window.removeEventListener('themeUpdated', handleThemeUpdate);
+    };
+  }, []);
 
   useEffect(() => {
     const updatedUser = JSON.parse(localStorage.getItem('user') || '{"name": "Guest", "role": "user"}');
@@ -404,25 +418,87 @@ export default function SettingsPage() {
         {activeTab === 'system' && (
           <div className="space-y-4">
             {[
-              { icon: Shield, title: 'Security & Auth', desc: 'Manage 2FA status, session idle limits, IP restrictions, and audit logs routing.' },
-              { icon: Bell, title: 'Notifications', desc: 'Configure automatic emails, critical SMS notifications, and system webhook URLs.' },
-              { icon: Globe, title: 'Regional Support', desc: 'Define default organization business hours, holiday exclusions, and automated time-out replies.' },
-              { icon: Monitor, title: 'Interface Customization', desc: 'Customize dark-mode presets, font settings, high accessibility contrasts, and high-density dashboard layouts.' },
-              { icon: Lock, title: 'Compliance Hub', desc: 'Manage strict GDPR consent requests, private database backups, SOC2 compliance reporting, and manual clean data deletes.' },
-            ].map((setting, i) => (
-              <div key={i} className="bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm flex items-start gap-8 group hover:bg-[#FBFCFF] transition-all cursor-pointer">
-                 <div className="p-4 bg-[#F1F3F9] text-[#1034A6] rounded-2xl group-hover:bg-[#1034A6] group-hover:text-white transition-all shadow-sm shrink-0">
-                    <setting.icon className="h-7 w-7" />
-                 </div>
-                 <div className="flex-1 space-y-2">
-                    <h3 className="text-xl font-black text-slate-900 tracking-tight flex items-center justify-between">
-                      {setting.title}
-                      <span className="text-[10px] font-black text-[#1034A6] opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-[0.2em] italic">Maintain Settings</span>
-                    </h3>
-                    <p className="text-slate-500 font-bold text-sm leading-relaxed">{setting.desc}</p>
-                 </div>
-              </div>
-            ))}
+              { id: 'security', icon: Shield, title: 'Security & Auth', desc: 'Manage 2FA status, session idle limits, IP restrictions, and audit logs routing.' },
+              { id: 'notifications', icon: Bell, title: 'Notifications', desc: 'Configure automatic emails, critical SMS notifications, and system webhook URLs.' },
+              { id: 'regional', icon: Globe, title: 'Regional Support', desc: 'Define default organization business hours, holiday exclusions, and automated time-out replies.' },
+              { id: 'interface', icon: Monitor, title: 'Interface Customization', desc: 'Configure theme specifications, dynamic accessibility contrast scales, and system layouts.' },
+              { id: 'compliance', icon: Lock, title: 'Compliance Hub', desc: 'Manage strict GDPR consent requests, private database backups, SOC2 compliance reporting, and manual clean data deletes.' },
+            ].map((setting, i) => {
+              const isInterface = setting.id === 'interface';
+              return (
+                <div key={i} className="bg-white p-6 sm:p-8 rounded-[32px] border border-slate-200 shadow-sm flex flex-col md:flex-row items-stretch md:items-start gap-6 sm:gap-8 group transition-all">
+                  <div className="p-4 bg-[#F1F3F9] text-[#1034A6] rounded-2xl shadow-sm shrink-0 flex items-center justify-center self-start">
+                     <setting.icon className="h-7 w-7" />
+                  </div>
+                  <div className="flex-1 space-y-4">
+                     <div className="space-y-1">
+                       <h3 className="text-xl font-black text-slate-900 tracking-tight">
+                         {setting.title}
+                       </h3>
+                       <p className="text-slate-500 font-bold text-sm leading-relaxed">{setting.desc}</p>
+                     </div>
+
+                     {isInterface && (
+                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg pt-2">
+                         {/* Light Mode */}
+                         <button
+                           type="button"
+                           onClick={() => setSystemTheme('light')}
+                           className={cn(
+                             "p-4 rounded-2xl border text-left flex items-center gap-3 transition-all cursor-pointer outline-none select-none",
+                             theme === 'light' 
+                               ? "border-[#1034A6] bg-blue-50/50 shadow-sm" 
+                               : "border-slate-200 bg-white hover:bg-slate-50"
+                           )}
+                         >
+                           <div className={cn(
+                             "p-2.5 rounded-xl border transition-colors",
+                             theme === 'light' ? "bg-white border-blue-200 text-[#1034A6]" : "bg-slate-50 border-slate-100 text-slate-400"
+                           )}>
+                             <Sun className="h-4 w-4" />
+                           </div>
+                           <div className="flex-1 min-w-0">
+                             <p className="text-xs font-black text-slate-900 uppercase tracking-widest leading-none">Light Mode</p>
+                             <p className="text-[10px] text-slate-400 font-bold mt-1.5 uppercase tracking-wider">Classic Workspace</p>
+                           </div>
+                           {theme === 'light' && (
+                             <div className="w-1.5 h-1.5 rounded-full bg-[#1034A6] shrink-0" />
+                           )}
+                         </button>
+
+                         {/* Dark Mode */}
+                         <button
+                           type="button"
+                           onClick={() => setSystemTheme('dark')}
+                           className={cn(
+                             "p-4 rounded-2xl border text-left flex items-center gap-3 transition-all cursor-pointer outline-none select-none",
+                             theme === 'dark' 
+                               ? "border-[#1034A6] bg-indigo-950/25 shadow-sm" 
+                               : "border-slate-200 bg-white hover:bg-slate-50"
+                           )}
+                         >
+                           <div className={cn(
+                             "p-2.5 rounded-xl border transition-colors",
+                             theme === 'dark' ? "bg-slate-800 border-indigo-900 text-amber-400" : "bg-slate-50 border-slate-100 text-slate-400"
+                           )}>
+                             <Moon className="h-4 w-4" />
+                           </div>
+                           <div className="flex-1 min-w-0">
+                             <p className="text-xs font-black text-slate-900 uppercase tracking-widest leading-none">Dark Mode</p>
+                             <p className="text-[10px] text-slate-400 font-bold mt-1.5 uppercase tracking-wider">Cosmic Workspace</p>
+                           </div>
+                           {theme === 'dark' && (
+                             <div className="w-1.5 h-1.5 rounded-full bg-[#1034A6] shrink-0" />
+                           )}
+                         </button>
+                       </div>
+                     )}
+                  </div>
+                </div>
+              );
+            })}
+
+
 
             <div className="pt-8 flex justify-end">
                <button 
@@ -438,6 +514,7 @@ export default function SettingsPage() {
             </div>
           </div>
         )}
+
 
       </div>
     </AgentShell>

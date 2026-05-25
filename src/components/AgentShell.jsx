@@ -14,11 +14,14 @@ import {
   CheckCircle2,
   AlertCircle,
   Info,
-  Check
+  Check,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { socket } from '../lib/socket';
 import { Sidebar } from './Sidebar';
+import { getSystemTheme, setSystemTheme } from '../lib/theme';
 
 export const AgentShell = ({ children, title, subtitle, actions }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -41,6 +44,23 @@ export const AgentShell = ({ children, title, subtitle, actions }) => {
       window.removeEventListener('userProfileUpdated', handleProfileUpdate);
     };
   }, []);
+
+  const [theme, setTheme] = useState(() => getSystemTheme());
+
+  useEffect(() => {
+    const handleThemeUpdate = (e) => {
+      setTheme(e.detail?.theme || getSystemTheme());
+    };
+    window.addEventListener('themeUpdated', handleThemeUpdate);
+    return () => {
+      window.removeEventListener('themeUpdated', handleThemeUpdate);
+    };
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    setSystemTheme(newTheme);
+  };
 
   useEffect(() => {
     const updateUnreadCount = () => {
@@ -410,6 +430,22 @@ export const AgentShell = ({ children, title, subtitle, actions }) => {
                       Discussions
                     </span>
                   </Link>
+
+                  <button 
+                    type="button"
+                    onClick={toggleTheme}
+                    className="group relative p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-905 rounded-lg transition-colors cursor-pointer"
+                    aria-label="Toggle visual theme mode"
+                  >
+                    {theme === 'dark' ? (
+                      <Sun className="h-5 w-5 text-amber-400" />
+                    ) : (
+                      <Moon className="h-5 w-5 text-slate-500" />
+                    )}
+                    <span className="absolute top-full left-1/2 -translate-x-1/2 mt-2.5 px-2 py-1 bg-slate-900 text-white text-[10px] font-black tracking-wide rounded shadow-md opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-150 pointer-events-none whitespace-nowrap z-30 uppercase">
+                      {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                    </span>
+                  </button>
                 </div>
 
                 <div className="relative">
