@@ -28,8 +28,19 @@ export const AgentShell = ({ children, title, subtitle, actions }) => {
   const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
   const [isNotificationsDropdownOpen, setIsNotificationsDropdownOpen] = useState(false);
   const [notificationsList, setNotificationsList] = useState([]);
-  const user = JSON.parse(localStorage.getItem('user') || '{"name": "Guest", "role": "user"}');
+  const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user') || '{"name": "Guest", "role": "user"}'));
   const storageKey = user && user.email ? `notifications_${user.email}` : 'notifications';
+
+  useEffect(() => {
+    const handleProfileUpdate = () => {
+      const updatedUser = JSON.parse(localStorage.getItem('user') || '{"name": "Guest", "role": "user"}');
+      setUser(updatedUser);
+    };
+    window.addEventListener('userProfileUpdated', handleProfileUpdate);
+    return () => {
+      window.removeEventListener('userProfileUpdated', handleProfileUpdate);
+    };
+  }, []);
 
   useEffect(() => {
     const updateUnreadCount = () => {
@@ -411,8 +422,12 @@ export const AgentShell = ({ children, title, subtitle, actions }) => {
                         <p className="text-sm font-bold text-slate-900 tracking-tight leading-none">{user.name}</p>
                         <p className="text-[10px] font-medium text-slate-400 uppercase tracking-widest mt-1.5">{user.role}</p>
                      </div>
-                     <div className="w-9 h-9 rounded-full bg-indigo-100 border border-indigo-200 flex items-center justify-center text-xs font-black text-[#1034A6] shadow-sm uppercase shrink-0">
-                       {user.name?.[0]}
+                     <div className="w-9 h-9 rounded-full bg-indigo-100 border border-indigo-200 flex items-center justify-center text-xs font-black text-[#1034A6] shadow-sm uppercase shrink-0 overflow-hidden">
+                       {user.avatar ? (
+                         <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                       ) : (
+                         user.name?.[0]
+                       )}
                      </div>
                      <ChevronDown className="h-3 w-3 text-slate-400 hidden sm:block shrink-0" />
                   </button>

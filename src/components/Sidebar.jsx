@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Home, 
   LayoutList, 
@@ -34,7 +34,18 @@ const sidebarItems = [
 
 export const Sidebar = ({ isOpen, onClose }) => {
   const location = useLocation();
-  const user = JSON.parse(localStorage.getItem('user') || '{"name": "Guest", "role": "user"}');
+  const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user') || '{"name": "Guest", "role": "user"}'));
+
+  useEffect(() => {
+    const handleProfileUpdate = () => {
+      const updatedUser = JSON.parse(localStorage.getItem('user') || '{"name": "Guest", "role": "user"}');
+      setUser(updatedUser);
+    };
+    window.addEventListener('userProfileUpdated', handleProfileUpdate);
+    return () => {
+      window.removeEventListener('userProfileUpdated', handleProfileUpdate);
+    };
+  }, []);
 
   const logout = () => {
     localStorage.removeItem('token');
@@ -98,8 +109,12 @@ export const Sidebar = ({ isOpen, onClose }) => {
 
       <div className="p-6 mt-auto border-t border-slate-200/50 space-y-4">
         <div className="flex items-center gap-3 px-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-           <div className="w-9 h-9 rounded-full bg-indigo-100 border border-indigo-200 flex items-center justify-center text-xs font-black text-[#1034A6] shadow-sm uppercase shrink-0">
-             {user.name?.[0]}
+           <div className="w-9 h-9 rounded-full bg-indigo-100 border border-indigo-200 flex items-center justify-center text-xs font-black text-[#1034A6] shadow-sm uppercase shrink-0 overflow-hidden">
+             {user.avatar ? (
+               <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+             ) : (
+               user.name?.[0]
+             )}
            </div>
            <div className="text-left min-w-0 flex-1">
               <p className="text-xs font-bold text-slate-900 tracking-tight leading-none truncate">{user.name}</p>
